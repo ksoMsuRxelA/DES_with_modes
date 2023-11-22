@@ -134,9 +134,9 @@ static inline void print_array(uint8_t * array, size_t length);
 static inline void print_bits(uint64_t x, register uint64_t Nbit);
 
 int main(void) {
-    uint8_t encrypted[BUFF_SIZE], decrypted[BUFF_SIZE];
-    uint8_t buffer[BUFF_SIZE] = {0};
-    uint8_t keys8b[8] = "DESkey56";
+    uint8_t encrypted[BUFF_SIZE], decrypted[BUFF_SIZE]; // в эти массивы помещается зашифрованное и расшированное сообщения
+    uint8_t buffer[BUFF_SIZE] = {0}; // сюда записывается открытое сообщение
+    uint8_t keys8b[8] = "DESkey56"; // ключ, у которого будет удаляться каждый 8-ой бит, и получится ключ в 56 бит
 
     size_t length = input_string(buffer);
     print_array(buffer, length);
@@ -151,19 +151,19 @@ int main(void) {
 }
 
 size_t DES(uint8_t * to, uint8_t mode, uint8_t * keys8b, uint8_t * from, size_t length) {
-    length = length % 8 == 0 ? length : length + (8 - (length % 8));
+    length = length % 8 == 0 ? length : length + (8 - (length % 8)); // выравние длины ключа под блок 8 байт
     
-    uint64_t keys48b[16] = {0};
-    uint32_t N1, N2;
+    uint64_t keys48b[16] = {0}; // создаются 16 ключей по 48 бит
+    uint32_t N1, N2; // левый и правые блоки соответственно
 
-    key_expansion(
+    key_expansion( // расширение ключа
         join_8bits_to_64bits(keys8b), 
         keys48b
     );
 
     for (size_t i = 0; i < length; i += 8) {
-        split_64bits_to_32bits(
-            initial_permutation(
+        split_64bits_to_32bits( // сливаем 8-байтовый блок в один 64-битный блок
+            initial_permutation( 
                 join_8bits_to_64bits(from + i)
             ), 
             &N1, &N2
